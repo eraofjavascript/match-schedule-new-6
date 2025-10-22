@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const { data, error } = await supabase.auth.signUp({
-        email: `${username}@sportschedule.local`,
+        email: `${username}@sportschedule.app`,
         password,
         options: {
           data: {
@@ -115,7 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (username: string, password: string) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: `${username}@sportschedule.local`,
+        email: `${username}@sportschedule.app`,
         password,
       });
 
