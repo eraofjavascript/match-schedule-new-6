@@ -10,14 +10,26 @@ import { Trophy } from 'lucide-react';
 import { z } from 'zod';
 
 const signUpSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters').max(20, 'Username must be less than 20 characters'),
-  displayName: z.string().min(1, 'Display name is required').max(50, 'Display name must be less than 50 characters'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  username: z
+    .string()
+    .trim()
+    .min(3, 'Username must be at least 3 characters')
+    .max(20, 'Username must be less than 20 characters')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Only letters, numbers, and underscores (no spaces or @)')
+    .transform((v) => v.toLowerCase()),
+  displayName: z.string().trim().min(1, 'Display name is required').max(50, 'Display name must be less than 50 characters'),
+  password: z.string().min(6, 'Password must be at least 6 characters').max(128, 'Password must be less than 128 characters'),
 });
 
 const signInSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  username: z
+    .string()
+    .trim()
+    .min(3, 'Username must be at least 3 characters')
+    .max(20, 'Username must be less than 20 characters')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Only letters, numbers, and underscores (no spaces or @)')
+    .transform((v) => v.toLowerCase()),
+  password: z.string().min(6, 'Password must be at least 6 characters').max(128, 'Password must be less than 128 characters'),
 });
 
 const Auth = () => {
@@ -111,6 +123,7 @@ const Auth = () => {
                       onChange={(e) => setSignInData({ ...signInData, username: e.target.value })}
                       required
                     />
+                    <p className="text-xs text-muted-foreground">3-20 letters, numbers, underscores. No @ or spaces.</p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signin-password">Password</Label>
@@ -141,6 +154,7 @@ const Auth = () => {
                       onChange={(e) => setSignUpData({ ...signUpData, username: e.target.value })}
                       required
                     />
+                    <p className="text-xs text-muted-foreground">3-20 letters, numbers, underscores. No @ or spaces.</p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-displayname">Display Name</Label>
