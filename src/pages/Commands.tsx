@@ -33,8 +33,10 @@ const Commands = () => {
       password,
       options: {
         data: {
+          username: username,
           display_name: displayName,
         },
+        emailRedirectTo: `${window.location.origin}/`,
       },
     });
 
