@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -102,51 +101,52 @@ const Chat = () => {
     }
   };
 
-  return (
-    <div className="max-w-4xl mx-auto space-y-4">
-      <div>
-        <h2 className="text-3xl font-bold mb-2 neon-text">Chat</h2>
-        <p className="text-muted-foreground">Connect with the community</p>
-      </div>
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-      <Card className="neon-border h-[600px] flex flex-col">
-        <CardHeader>
-          <CardTitle>Sports Chat Room</CardTitle>
-        </CardHeader>
-        <CardContent className="flex-1 flex flex-col">
-          <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-            {messages.map((msg) => (
-              <div key={msg.id} className="bg-muted rounded-lg p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <Avatar className="h-8 w-8 border border-primary/20">
-                    <AvatarImage src={msg.avatar_url || undefined} />
-                    <AvatarFallback className="bg-primary/20 text-primary text-xs">
-                      {msg.display_name?.charAt(0).toUpperCase() || '?'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="font-bold text-primary">{msg.display_name}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(msg.created_at).toLocaleTimeString()}
-                  </span>
-                </div>
-                <p className="ml-10">{msg.content}</p>
-              </div>
-            ))}
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  return (
+    <div className="fixed inset-0 flex flex-col" style={{ paddingTop: '64px', paddingBottom: '73px' }}>
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+        {messages.map((msg) => (
+          <div key={msg.id} className="bg-muted rounded-lg p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Avatar className="h-8 w-8 border border-primary/20">
+                <AvatarImage src={msg.avatar_url || undefined} />
+                <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                  {msg.display_name?.charAt(0).toUpperCase() || '?'}
+                </AvatarFallback>
+              </Avatar>
+              <span className="font-bold text-primary">{msg.display_name}</span>
+              <span className="text-xs text-muted-foreground">
+                {new Date(msg.created_at).toLocaleTimeString()}
+              </span>
+            </div>
+            <p className="ml-10">{msg.content}</p>
           </div>
-          
-          <div className="flex gap-2">
-            <Input
-              placeholder="Type your message..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-            />
-            <Button onClick={handleSend}>
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+      
+      <div className="border-t border-border bg-card/50 backdrop-blur-sm px-4 py-3">
+        <div className="max-w-4xl mx-auto flex gap-2">
+          <Input
+            placeholder="Type your message..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+          />
+          <Button onClick={handleSend}>
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
