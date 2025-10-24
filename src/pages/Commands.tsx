@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { UserPlus } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { UserPlus, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -13,6 +14,15 @@ const Commands = () => {
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const [showSchedule, setShowSchedule] = useState(false);
+  const [title, setTitle] = useState('');
+  const [gameName, setGameName] = useState('');
+  const [time, setTime] = useState('');
+  const [date, setDate] = useState('');
+  const [place, setPlace] = useState('');
+  const [description, setDescription] = useState('');
+  const [scheduleLoading, setScheduleLoading] = useState(false);
 
   const handleCreateUser = async () => {
     if (!username || !password || !displayName) {
@@ -50,6 +60,46 @@ const Commands = () => {
       setShowSignup(false);
     }
     setLoading(false);
+  };
+
+  const handleCreateSchedule = async () => {
+    if (!title || !gameName || !time || !date || !place) {
+      toast.error('Title, game name, time, date, and place are required');
+      return;
+    }
+
+    setScheduleLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      toast.error('You must be logged in to create a schedule');
+      setScheduleLoading(false);
+      return;
+    }
+
+    const { error } = await supabase.from('schedules').insert({
+      title,
+      game_name: gameName,
+      time,
+      date,
+      place,
+      description,
+      user_id: user.id,
+    });
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success('Schedule created successfully!');
+      setTitle('');
+      setGameName('');
+      setTime('');
+      setDate('');
+      setPlace('');
+      setDescription('');
+      setShowSchedule(false);
+    }
+    setScheduleLoading(false);
   };
 
   return (
@@ -113,6 +163,91 @@ const Commands = () => {
                   disabled={loading}
                 >
                   {loading ? 'Creating...' : 'Create User'}
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="neon-border hover:shadow-lg transition-all">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-lg bg-primary/20">
+                <Calendar className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <CardTitle>Create Schedule</CardTitle>
+                <CardDescription>Post a new game schedule</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={() => setShowSchedule(!showSchedule)} className="w-full">
+              {showSchedule ? 'Cancel' : 'Access'}
+            </Button>
+
+            {showSchedule && (
+              <div className="mt-6 space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    id="title"
+                    placeholder="Enter title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="gameName">Game Name</Label>
+                  <Input
+                    id="gameName"
+                    placeholder="Enter game name"
+                    value={gameName}
+                    onChange={(e) => setGameName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="time">Time</Label>
+                  <Input
+                    id="time"
+                    type="time"
+                    value={time}
+                    onChange={(e) => setTime(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="date">Date</Label>
+                  <Input
+                    id="date"
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="place">Place</Label>
+                  <Input
+                    id="place"
+                    placeholder="Enter venue/location"
+                    value={place}
+                    onChange={(e) => setPlace(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    placeholder="Enter description (optional)"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                </div>
+                <Button 
+                  onClick={handleCreateSchedule} 
+                  className="w-full"
+                  disabled={scheduleLoading}
+                >
+                  {scheduleLoading ? 'Publishing...' : 'Publish'}
                 </Button>
               </div>
             )}
