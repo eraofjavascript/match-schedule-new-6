@@ -14,80 +14,102 @@ export type Database = {
   }
   public: {
     Tables: {
-      messages: {
+      schedule_comments: {
         Row: {
-          avatar_url: string | null
           content: string
           created_at: string
-          display_name: string | null
           id: string
+          schedule_id: string
           user_id: string
         }
         Insert: {
-          avatar_url?: string | null
           content: string
           created_at?: string
-          display_name?: string | null
           id?: string
+          schedule_id: string
           user_id: string
         }
         Update: {
-          avatar_url?: string | null
           content?: string
           created_at?: string
-          display_name?: string | null
           id?: string
+          schedule_id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "schedule_comments_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "schedules"
+            referencedColumns: ["id"]
+          },
+        ]
       }
-      profiles: {
-        Row: {
-          avatar_url: string | null
-          created_at: string
-          display_name: string
-          id: string
-          updated_at: string
-          user_id: string
-          username: string
-        }
-        Insert: {
-          avatar_url?: string | null
-          created_at?: string
-          display_name: string
-          id?: string
-          updated_at?: string
-          user_id: string
-          username: string
-        }
-        Update: {
-          avatar_url?: string | null
-          created_at?: string
-          display_name?: string
-          id?: string
-          updated_at?: string
-          user_id?: string
-          username?: string
-        }
-        Relationships: []
-      }
-      user_roles: {
+      schedule_reactions: {
         Row: {
           created_at: string
+          emoji: string
           id: string
-          role: Database["public"]["Enums"]["app_role"]
+          schedule_id: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          emoji: string
           id?: string
-          role: Database["public"]["Enums"]["app_role"]
+          schedule_id: string
           user_id: string
         }
         Update: {
           created_at?: string
+          emoji?: string
           id?: string
-          role?: Database["public"]["Enums"]["app_role"]
+          schedule_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schedule_reactions_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schedules: {
+        Row: {
+          created_at: string
+          date: string
+          description: string | null
+          game_name: string
+          id: string
+          place: string
+          time: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          description?: string | null
+          game_name: string
+          id?: string
+          place: string
+          time: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          description?: string | null
+          game_name?: string
+          id?: string
+          place?: string
+          time?: string
+          title?: string
           user_id?: string
         }
         Relationships: []
@@ -97,16 +119,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
-      app_role: "admin" | "user"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -233,8 +249,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      app_role: ["admin", "user"],
-    },
+    Enums: {},
   },
 } as const
