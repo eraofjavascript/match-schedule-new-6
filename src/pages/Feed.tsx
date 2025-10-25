@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Calendar, Clock, MapPin, MessageCircle, Smile } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { Link } from 'react-router-dom';
 
 interface Schedule {
   id: string;
@@ -34,6 +36,7 @@ interface Reaction {
 }
 
 const Feed = () => {
+  const { user } = useAuth();
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [comments, setComments] = useState<Record<string, Comment[]>>({});
   const [reactions, setReactions] = useState<Record<string, Reaction[]>>({});
@@ -164,7 +167,7 @@ const Feed = () => {
     });
 
     if (error) {
-      toast.error('Failed to add comment');
+      toast.error(error.message || 'Failed to add comment');
     } else {
       setNewComment({ ...newComment, [scheduleId]: '' });
     }
@@ -195,7 +198,23 @@ const Feed = () => {
         emoji,
       });
 
-      if (error) toast.error('Failed to add reaction');
+      if (error) {
+        // Unique violation fallback: toggle off if already reacted
+        if ((error as any).code === '23505') {
+          const { data: existing } = await supabase
+            .from('schedule_reactions')
+            .select('id')
+            .eq('schedule_id', scheduleId)
+            .eq('user_id', user.id)
+            .eq('emoji', emoji)
+            .maybeSingle();
+          if (existing?.id) {
+            await supabase.from('schedule_reactions').delete().eq('id', existing.id);
+          }
+        } else {
+          toast.error(error.message || 'Failed to add reaction');
+        }
+      }
     }
   };
 
@@ -293,25 +312,34 @@ const Feed = () => {
 
                   {showComments[schedule.id] && (
                     <div className="mt-4 space-y-4">
-                      {/* Comment Input */}
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Write a comment..."
-                          value={newComment[schedule.id] || ''}
-                          onChange={(e) => setNewComment({ 
-                            ...newComment, 
-                            [schedule.id]: e.target.value 
-                          })}
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
-                              handleAddComment(schedule.id);
-                            }
-                          }}
-                        />
-                        <Button onClick={() => handleAddComment(schedule.id)}>
-                          Post
-                        </Button>
-                      </div>
+                      {user ? (
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Write a comment..."
+                            value={newComment[schedule.id] || ''}
+                            onChange={(e) => setNewComment({ 
+                              ...newComment, 
+                              [schedule.id]: e.target.value 
+                            })}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                handleAddComment(schedule.id);
+                              }
+                            }}
+                          />
+                          <Button onClick={() => handleAddComment(schedule.id)}>
+                            Post
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between bg-muted/50 rounded-lg p-3">
+                          <span className="text-sm text-muted-foreground">Sign in to comment</span>
+                          <Button asChild variant="outline" size="sm">
+                            <Link to="/auth">Sign in</Link>
+                          </Button>
+                        </div>
+                      )}
+
 
                       {/* Comments List */}
                       <div className="space-y-2">
