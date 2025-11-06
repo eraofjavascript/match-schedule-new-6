@@ -71,35 +71,6 @@ export type Database = {
         }
         Relationships: []
       }
-      schedule_comment_likes: {
-        Row: {
-          comment_id: string
-          created_at: string
-          id: string
-          user_id: string
-        }
-        Insert: {
-          comment_id: string
-          created_at?: string
-          id?: string
-          user_id: string
-        }
-        Update: {
-          comment_id?: string
-          created_at?: string
-          id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "schedule_comment_likes_comment_id_fkey"
-            columns: ["comment_id"]
-            isOneToOne: false
-            referencedRelation: "schedule_comments"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       schedule_comments: {
         Row: {
           content: string
@@ -129,13 +100,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "schedules"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "schedule_comments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
           },
         ]
       }
